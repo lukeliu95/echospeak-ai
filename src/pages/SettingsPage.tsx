@@ -127,14 +127,19 @@ export function SettingsPage({ profile, onProfileChange }: {
       {/* recording policy */}
       <div className="st-group">
         <div className="sg-title">录音与隐私</div>
-        <div className="sg-desc">训练反馈只保存文字结果。录音文件是否保留由你决定。</div>
+        <div className="sg-desc">当前版本只保存文字评分结果,录音音频评分后立即丢弃,不落盘。回放历史录音在后续版本中加入。</div>
         <div className="radio-list">
           {([
-            ['none', '不保存录音', '评分后立即删除音频，最私密（默认）'],
-            ['7d', '保存最近 7 天', '可回放一周内录音，超期自动清理'],
-            ['forever', '永久保存', '保留全部录音，自行管理磁盘'],
-          ] as [RecordingPolicy, string, string][]).map(([val, t, d]) => (
-            <label key={val} className={`radio-opt ${policy === val ? 'sel' : ''}`} onClick={() => setPolicy(val)}>
+            ['none', '不保存录音', '评分后立即删除音频(当前唯一行为)', false],
+            ['7d', '保存最近 7 天 · 即将推出', '需要回放历史录音的话先用这条提需求', true],
+            ['forever', '永久保存 · 即将推出', '保留全部录音,需要的话提需求', true],
+          ] as [RecordingPolicy, string, string, boolean][]).map(([val, t, d, disabled]) => (
+            <label
+              key={val}
+              className={`radio-opt ${policy === val ? 'sel' : ''} ${disabled ? 'disabled' : ''}`}
+              onClick={() => { if (!disabled) setPolicy(val); }}
+              aria-disabled={disabled}
+            >
               <span className="r-dot" />
               <div className="r-line"><span className="r-t">{t}</span><span className="r-d">{d}</span></div>
             </label>

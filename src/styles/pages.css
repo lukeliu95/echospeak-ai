@@ -114,6 +114,7 @@ html, body, #root { height: 100%; }
 .radio-list { display:flex; flex-direction:column; gap:5px; }
 .radio-opt { display:flex; align-items:flex-start; gap:12px; padding:6px 14px; border:1px solid var(--es-border); border-radius:var(--es-r-sm); cursor:pointer; }
 .radio-opt.sel { border-color:var(--es-accent); background:var(--es-accent-soft); }
+.radio-opt.disabled { opacity:0.5; cursor:not-allowed; }
 .radio-opt .r-dot { width:18px;height:18px;border-radius:50%;border:2px solid var(--es-border-strong);flex-shrink:0;margin-top:1px; }
 .radio-opt.sel .r-dot { border-color:var(--es-accent); background:radial-gradient(var(--es-accent) 0 5px, #fff 6px); }
 .radio-opt .r-line { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
@@ -174,6 +175,7 @@ html, body, #root { height: 100%; }
 .ap-wave i { flex:1; background:var(--es-accent-muted); border-radius:2px; transition: background var(--es-dur-base) var(--es-ease); }
 .ap-wave i.played { background:var(--es-accent); }
 .ap-time { font-size:var(--es-fs-caption); color:var(--es-text-tertiary); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.play-err { margin-top:8px; font-size:var(--es-fs-caption); color:var(--es-error); }
 .ap-tools { display:flex; gap:8px; margin-top:14px; }
 .ap-tool { font-family:inherit; font-size:var(--es-fs-label); padding:6px 12px; border:1px solid var(--es-border); border-radius:var(--es-r-sm); background:var(--es-bg-surface); color:var(--es-text-secondary); cursor:pointer; }
 .ap-tool:hover { background:var(--es-bg-subtle); }

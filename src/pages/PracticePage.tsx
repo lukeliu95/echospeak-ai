@@ -50,6 +50,7 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
   const [score, setScore] = useState<ScoreResult | null>(null);
   const [errMsg, setErrMsg] = useState('');
   const [playing, setPlaying] = useState(false);
+  const [playErr, setPlayErr] = useState(''); // inline TTS playback hint — non-blocking
   const [doneCount, setDoneCount] = useState(0); // sentences with at least one scored take
   const [completed, setCompleted] = useState(false);
   const [reviewMarked, setReviewMarked] = useState(false);
@@ -76,16 +77,18 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
   async function playOriginal() {
     if (!window.echo?.speakSentence) return;
     setPlaying(true);
+    setPlayErr('');
     try {
       const res = await window.echo.speakSentence(cur.en);
-      if (!res.ok) { setPlaying(false); return; }
+      if (!res.ok) { setPlaying(false); setPlayErr(res.error || '播放失败,请检查网络与 API Key'); return; }
       const rate = Number(/rate=(\d+)/.exec(res.mimeType)?.[1]) || 24000;
       const q = new AudioQueue(rate);
       q.onPlaying = (active) => setPlaying(active);
       queue.current = q;
       q.enqueue(base64ToInt16(res.audioBase64));
-    } catch {
+    } catch (e: any) {
       setPlaying(false);
+      setPlayErr('播放失败:' + (e?.message || '未知错误'));
     }
   }
 
@@ -320,6 +323,7 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
               <button className="ap-tool" onClick={playOriginal}>⟲ 重听</button>
             </div>
           </div>
+          {playErr && <div className="play-err" role="alert">{playErr}</div>}
 
           <div className="record-zone">
             <button
