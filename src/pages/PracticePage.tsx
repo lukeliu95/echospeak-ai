@@ -307,7 +307,7 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
 
           <div className="audio-player">
             <div className="ap-row">
-              <button className="ap-play" onClick={playOriginal} title="听原句">
+              <button className="ap-play" onClick={playOriginal} title="听原句" aria-label={playing ? '暂停播放' : '播放原句'}>
                 {playing
                   ? <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
                   : <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>}

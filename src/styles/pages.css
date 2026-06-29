@@ -8,6 +8,14 @@ html, body, #root { height: 100%; }
 .app-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
 .app-loading { margin: auto; color: var(--es-text-tertiary); }
 
+/* a11y: focus ring for any element made keyboard-clickable via lib/a11y.ts */
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible {
+  outline: none;
+  box-shadow: var(--es-sh-focus);
+  border-radius: var(--es-r-sm);
+}
+
 /* nav inside the titlebar */
 .es-nav { display: flex; gap: 2px; margin-left: 24px; }
 .es-nav-item {

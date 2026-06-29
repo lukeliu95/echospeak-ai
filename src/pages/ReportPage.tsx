@@ -5,6 +5,7 @@
 import { useRouter } from '../router';
 import { useReportData } from '../lib/useProfile';
 import { computeKpis, dailySpeakingBars, topMistakes, categoryLabel } from '../lib/reportData';
+import { clickable } from '../lib/a11y';
 import type { UserProfile } from '../../electron/storage/types';
 
 export function ReportPage({ profile }: { profile: UserProfile | null }) {
@@ -73,7 +74,7 @@ export function ReportPage({ profile }: { profile: UserProfile | null }) {
       </div>
 
       {/* CTA: review */}
-      <div className="rp-next" onClick={() => navigate('review')} style={{ cursor: 'pointer' }}>
+      <div className="rp-next" {...clickable(() => navigate('review'), '进入每日复习')} style={{ cursor: 'pointer' }}>
         <div className="n-ic"><svg viewBox="0 0 24 24" width="22" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z" /></svg></div>
         <div style={{ flex: 1 }}>
           <div className="n-t">{hasAnyData ? '开始每日复习' : '复习清单建设中'}</div>

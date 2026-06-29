@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useRouter } from '../router';
 import { useSessions, computeStreak, weekSpeakingMinutes, weekDots, todayStr } from '../lib/useProfile';
 import { generateDailyPlan } from '../lib/dailyPlan';
+import { clickable } from '../lib/a11y';
 import type { UserProfile } from '../../electron/storage/types';
 
 const GREETING = (() => {
@@ -91,17 +92,17 @@ export function HomePage({ profile }: { profile: UserProfile }) {
 
       {/* secondary actions */}
       <div className="quick-row">
-        <div className="quick" onClick={() => navigate('practice')}>
+        <div className="quick" {...clickable(() => navigate('practice'), 'Quick 10-Min · 没时间时系统自动选主题')}>
           <div className="q-ic"><svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M13 2v8h8a9 9 0 11-8-8z" /></svg></div>
           <div className="q-t">Quick 10-Min</div>
           <div className="q-d">没时间？系统自动选主题</div>
         </div>
-        <div className="quick" onClick={() => navigate('conversation')}>
+        <div className="quick" {...clickable(() => navigate('conversation'), 'Free Talk · 直接和 AI 自由聊')}>
           <div className="q-ic"><svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M12 3a9 9 0 00-9 9 9 9 0 009 9 9 9 0 009-9 9 9 0 00-9-9zm0 4a3 3 0 110 6 3 3 0 010-6z" /></svg></div>
           <div className="q-t">Free Talk</div>
           <div className="q-d">直接和 AI 自由聊</div>
         </div>
-        <div className="quick" onClick={() => navigate('review')}>
+        <div className="quick" {...clickable(() => navigate('review'), 'Review Mistakes · 复习昨天读不好的句子')}>
           <div className="q-ic"><svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M3 3h18v4H3zm0 7h18v4H3zm0 7h12v4H3z" /></svg></div>
           <div className="q-t">Review Mistakes</div>
           <div className="q-d">复习昨天读不好的句子</div>

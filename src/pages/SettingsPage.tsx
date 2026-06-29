@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import type { AiStatus } from '../global';
 import type { UserProfile } from '../../electron/storage/types';
+import { clickable } from '../lib/a11y';
 
 type RecordingPolicy = 'none' | '7d' | 'forever';
 const TIMES: (15 | 30 | 45 | 60)[] = [15, 30, 45, 60];
@@ -111,13 +112,23 @@ export function SettingsPage({ profile, onProfileChange }: {
         <div className="sg-desc">每天练多久。改动会更新今日计划的总时长与步骤分配。</div>
         <div className="time-grid">
           {TIMES.map((t) => (
-            <div key={t} className={`time-opt ${minutes === t ? 'sel' : ''}`} onClick={() => setMinutes(t)}>
+            <div
+              key={t}
+              className={`time-opt ${minutes === t ? 'sel' : ''}`}
+              {...clickable(() => setMinutes(t), `每日训练 ${t} 分钟`)}
+              aria-pressed={minutes === t}
+            >
               <div className="t-n">{t}</div><div className="t-u">分钟</div>
             </div>
           ))}
         </div>
         <div className="reminder-row" style={{ marginTop: 10 }}>
-          <div className={`toggle ${reminderOn ? '' : 'off'}`} onClick={() => setReminderOn((v) => !v)} />
+          <div
+            className={`toggle ${reminderOn ? '' : 'off'}`}
+            {...clickable(() => setReminderOn((v) => !v), '每日提醒开关')}
+            role="switch"
+            aria-checked={reminderOn}
+          />
           <span className="reminder-meta">每天</span>
           <input className="time-pick" type="text" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} />
           <span className="reminder-meta">提醒我开口练英语</span>
