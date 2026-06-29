@@ -15,6 +15,7 @@
     "test:report": "node test-report-data.mjs",
     "test:reminder": "node test-reminder.mjs",
     "test:noscroll": "node test-no-scroll.mjs",
+    "test:ttscache": "node test-tts-cache.mjs",
     "dist": "vite build && electron-builder --mac",
     "pack": "vite build && electron-builder --mac --dir"
   },

@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { startLiveSession, type LiveSessionHandle } from './liveSession';
 import { evaluateUtterance } from './scoring';
-import { synthesizeSentence } from './tts';
+import { synthesizeSentenceCached } from './tts';
 import { createStorage } from './storage/factory';
 import type { StorageAdapter } from './storage/types';
 import { scheduleReminder } from './reminder';
@@ -222,8 +222,9 @@ ipcMain.handle('ai:speakSentence', async (_e, payload: { text: string; voiceName
   const key = getEffectiveKey();
   if (!key) return { ok: false, error: 'GEMINI_API_KEY not found (env, api-keys.env, or settings override)' };
   try {
-    const tts = await synthesizeSentence(key, payload.text, payload.voiceName);
-    return { ok: true, ...tts };
+    const cacheDir = join(app.getPath('userData'), 'tts-cache');
+    const tts = await synthesizeSentenceCached(key, payload.text, cacheDir, payload.voiceName);
+    return { ok: true, ...tts }; // tts.cached === true means served from disk, no model call
   } catch (err: any) {
     return { ok: false, error: err?.message || String(err) };
   }
