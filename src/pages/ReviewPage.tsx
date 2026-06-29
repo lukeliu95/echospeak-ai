@@ -26,6 +26,7 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
   const [score, setScore] = useState<ScoreResult | null>(null);
   const [errMsg, setErrMsg] = useState('');
   const [playing, setPlaying] = useState(false);
+  const [playErr, setPlayErr] = useState(''); // inline TTS playback hint — non-blocking (same fix as PracticePage)
   const [reviewedCount, setReviewedCount] = useState(0);
   const [masteredCount, setMasteredCount] = useState(0);
   const [done, setDone] = useState(false);
@@ -52,16 +53,18 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
   async function playTarget() {
     if (!window.echo?.speakSentence || !target) return;
     setPlaying(true);
+    setPlayErr('');
     try {
       const res = await window.echo.speakSentence(target);
-      if (!res.ok) { setPlaying(false); return; }
+      if (!res.ok) { setPlaying(false); setPlayErr(res.error || '播放失败,请检查网络与 API Key'); return; }
       const rate = Number(/rate=(\d+)/.exec(res.mimeType)?.[1]) || 24000;
       const q = new AudioQueue(rate);
       q.onPlaying = (active) => setPlaying(active);
       audio.current = q;
       q.enqueue(base64ToInt16(res.audioBase64));
-    } catch {
+    } catch (e: any) {
       setPlaying(false);
+      setPlayErr('播放失败:' + (e?.message || '未知错误'));
     }
   }
 
@@ -170,7 +173,7 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
 
         <div className="audio-player" style={{ maxWidth: 480, width: '100%' }}>
           <div className="ap-row">
-            <button className="ap-play" onClick={playTarget} title="听正确说法">
+            <button className="ap-play" onClick={playTarget} title="听正确说法" aria-label={playing ? '暂停播放' : '播放正确说法'}>
               {playing
                 ? <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
                 : <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>}
@@ -182,6 +185,7 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
             </div>
             <span className="ap-time">{playing ? '播放中' : '点击听正确说法'}</span>
           </div>
+          {playErr && <div className="play-err" role="alert">{playErr}</div>}
         </div>
 
         <div className="record-zone" style={{ paddingTop: 18, marginTop: 8 }}>
