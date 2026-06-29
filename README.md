@@ -71,14 +71,17 @@ npm run dist    # 出 .dmg + .zip(release/)
 ## 🧪 测试
 
 ```bash
-npm run typecheck      # TS 类型检查
-npm run build          # 生产构建
-npm run test:storage   # 本地持久化冒烟
-npm run test:scoring   # 发音评分引擎往返(需 key)
-npm run test:roundtrip # 实时对话引擎往返(需 key)
-npm run test:report    # 进步页聚合 + 复习选取
-npm run test:reminder  # 每日提醒排程
-npm run test:noscroll  # 7 页一屏不溢出
+npm run typecheck       # TS 类型检查
+npm run build           # 生产构建
+npm run test:storage    # 本地持久化冒烟
+npm run test:scoring    # 发音评分引擎往返(需 key)
+npm run test:roundtrip  # 实时对话引擎往返(需 key)
+npm run test:ttscache   # TTS 磁盘缓存(同句重放读盘不调模型,需 key)
+npm run test:report     # 进步页聚合 + 复习选取
+npm run test:reminder   # 每日提醒排程
+npm run test:noscroll   # 7 页一屏不溢出
+npm run test:boot       # 无头启 Electron 窗口冒烟
+npm run test:closure    # 训练→评分→存储数据闭环
 ```
 
 ## ⚠️ 已知限制
