@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-electron/
+release/
+
+# secrets / local config — NEVER commit
+.env
+.env.local
+*.env
+
+# test audio artifacts
+*.wav
+
+# local runtime data
+echospeak-data.json
+*.tmp.mjs
+
+# tooling caches / probes
+.impeccable/
+.boot-probe.cjs
+.worktrees/
+.agent-home/
+
+# OS / editor
+.DS_Store
+*.log

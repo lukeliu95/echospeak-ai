@@ -1,0 +1,62 @@
+{
+  "name": "echospeak-ai",
+  "version": "0.1.0",
+  "description": "EchoSpeak AI — real-time English speaking coach (Gemini Live voice conversation slice)",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:roundtrip": "node test-conversation-roundtrip.mjs",
+    "test:scoring": "node test-scoring-roundtrip.mjs",
+    "test:closure": "node test-practice-data-closure.mjs",
+    "test:storage": "node test-storage-smoke.mjs",
+    "test:boot": "node test-electron-boot.mjs",
+    "test:report": "node test-report-data.mjs",
+    "test:reminder": "node test-reminder.mjs",
+    "test:noscroll": "node test-no-scroll.mjs",
+    "dist": "vite build && electron-builder --mac",
+    "pack": "vite build && electron-builder --mac --dir"
+  },
+  "build": {
+    "appId": "ai.echospeak.app",
+    "productName": "EchoSpeak AI",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.education",
+      "target": [
+        { "target": "dmg", "arch": "arm64" },
+        { "target": "zip", "arch": "arm64" }
+      ],
+      "identity": null
+    }
+  },
+  "dependencies": {
+    "@google/genai": "^2.10.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.0",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.6"
+  }
+}

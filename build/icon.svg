@@ -1,0 +1,42 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- EchoSpeak AI app icon · Mia (GEI)
+       Concept: "Echo" — a solid voice-source dot with three nested ripple arcs
+       radiating outward. Reads as both echo/soundwave and speech.
+       Brand: 墨绿 squircle (#357566 → #1F4A40), warm off-white mark (#F4F2ED). -->
+  <defs>
+    <linearGradient id="tile" x1="512" y1="0" x2="512" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#357566"/>
+      <stop offset="1" stop-color="#1F4A40"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="512" y1="40" x2="512" y2="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Big Sur squircle tile (content box 100→924 = 824px, ~22.4% corner radius).
+       Superellipse approximated with symmetric cubic segments. -->
+  <path id="squircle" d="M329 100
+           L 695 100
+           C 798 100 855 100 891 136
+           C 924 169 924 226 924 329
+           L 924 695
+           C 924 798 924 855 888 891
+           C 855 924 798 924 695 924
+           L 329 924
+           C 226 924 169 924 133 888
+           C 100 855 100 798 100 695
+           L 100 329
+           C 100 226 100 169 136 133
+           C 169 100 226 100 329 100 Z"/>
+  <use href="#squircle" fill="url(#tile)"/>
+  <use href="#squircle" fill="url(#sheen)"/>
+
+  <!-- Echo mark: voice-source dot + three nested ripple arcs opening right. -->
+  <g stroke="#F4F2ED" fill="none" stroke-linecap="round" transform="translate(14,0)">
+    <circle cx="385" cy="512" r="46" fill="#F4F2ED" stroke="none"/>
+    <path d="M470 410 A 150 150 0 0 1 470 614" stroke-width="52"/>
+    <path d="M548 372 A 228 228 0 0 1 548 652" stroke-width="52"/>
+    <path d="M626 336 A 308 308 0 0 1 626 688" stroke-width="52"/>
+  </g>
+</svg>

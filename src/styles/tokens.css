@@ -1,0 +1,121 @@
+/* EchoSpeak AI · design tokens (CSS) — mirror of design-tokens.json
+   小赵: 落到 src/renderer/src/styles/tokens.css。本文件供 mockup 共用,高保真静态稿。 */
+:root {
+  /* color · brand */
+  --es-accent: #2F6F62;
+  --es-accent-hover: #275C50;
+  --es-accent-active: #1F4A40;
+  --es-accent-soft: #E7F0EE;
+  --es-accent-muted: #A8C7C0;
+  /* color · neutral */
+  --es-bg-app: #F7F8F7;
+  --es-bg-surface: #FFFFFF;
+  --es-bg-subtle: #EFF1F0;
+  --es-bg-inset: #E9ECEB;
+  --es-border: #E2E5E4;
+  --es-border-strong: #CFD4D2;
+  --es-text-primary: #1C2422;
+  --es-text-secondary: #5A625F;
+  --es-text-tertiary: #8B928F;
+  --es-text-on-accent: #FFFFFF;
+  /* color · status */
+  --es-ai-speaking: #2F6F62;
+  --es-user-speaking: #C2603D;
+  --es-analyzing: #8B928F;
+  --es-feedback-ready: #3E7D52;
+  --es-success: #3E7D52;
+  --es-warning: #B7791F;
+  --es-error: #B4453A;
+  --es-info: #3A6B86;
+  /* color · score */
+  --es-score-track: #E9ECEB;
+  --es-score-fill: #2F6F62;
+  --es-score-fill-low: #A8C7C0;
+  /* typography */
+  --es-font-sans: -apple-system, "SF Pro Text", "PingFang SC", "Inter", system-ui, sans-serif;
+  --es-font-data: "SF Pro Display", -apple-system, "Inter", system-ui, sans-serif;
+  --es-font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+  --es-fs-data-xl: 56px;
+  --es-fs-data-lg: 40px;
+  --es-fs-display: 28px;
+  --es-fs-title: 20px;
+  --es-fs-subtitle: 17px;
+  --es-fs-body: 15px;
+  --es-fs-label: 13px;
+  --es-fs-caption: 12px;
+  /* spacing */
+  --es-sp-1: 4px;  --es-sp-2: 8px;  --es-sp-3: 12px; --es-sp-4: 16px;
+  --es-sp-5: 20px; --es-sp-6: 24px; --es-sp-8: 32px; --es-sp-10: 40px;
+  --es-sp-12: 48px; --es-sp-16: 64px; --es-sp-20: 80px;
+  /* layout · shared content column width for centered pages (home/report/settings) */
+  --es-content-w: 880px;
+  /* radius */
+  --es-r-sm: 6px; --es-r-md: 10px; --es-r-lg: 16px; --es-r-pill: 999px;
+  /* shadow */
+  --es-sh-xs: 0 1px 2px rgba(28,36,34,0.04);
+  --es-sh-sm: 0 2px 8px rgba(28,36,34,0.06);
+  --es-sh-md: 0 6px 20px rgba(28,36,34,0.08);
+  --es-sh-focus: 0 0 0 3px rgba(47,111,98,0.28);
+  /* motion */
+  --es-dur-fast: 120ms; --es-dur-base: 200ms; --es-dur-slow: 320ms; --es-dur-breath: 1800ms;
+  --es-ease: cubic-bezier(0.2,0,0,1);
+  --es-ease-breath: cubic-bezier(0.4,0,0.6,1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--es-font-sans);
+  color: var(--es-text-primary);
+  background: var(--es-bg-app);
+  font-size: var(--es-fs-body);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* macOS window chrome (mockup only — Electron 实际由窗口提供) */
+.es-window {
+  width: 1280px; min-height: 800px; margin: 24px auto;
+  background: var(--es-bg-app);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(28,36,34,0.18);
+  border: 1px solid var(--es-border);
+}
+.es-titlebar {
+  height: 38px; display: flex; align-items: center; gap: 8px;
+  /* left padding clears the inset native macOS traffic lights */
+  padding: 0 16px 0 84px; background: var(--es-bg-surface);
+  border-bottom: 1px solid var(--es-border);
+  -webkit-app-region: drag; /* whole bar drags the window */
+}
+/* interactive bits inside the draggable bar must opt out of dragging */
+.es-titlebar .es-nav, .es-titlebar button, .es-titlebar .es-nav-item {
+  -webkit-app-region: no-drag;
+}
+.es-titlebar .es-win-title { font-size: var(--es-fs-label); color: var(--es-text-tertiary); }
+
+/* reusable */
+.es-btn {
+  font-family: inherit; font-size: var(--es-fs-body); font-weight: 500;
+  border: none; border-radius: var(--es-r-sm); cursor: pointer;
+  padding: 10px 18px; transition: background var(--es-dur-fast) var(--es-ease);
+}
+.es-btn-primary { background: var(--es-accent); color: var(--es-text-on-accent); }
+.es-btn-primary:hover { background: var(--es-accent-hover); }
+.es-btn-secondary { background: var(--es-bg-subtle); color: var(--es-text-primary); }
+.es-btn-secondary:hover { background: var(--es-bg-inset); }
+.es-btn-ghost { background: transparent; color: var(--es-text-secondary); }
+.es-btn-ghost:hover { background: var(--es-bg-subtle); }
+
+.es-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--es-fs-label); color: var(--es-accent);
+  background: var(--es-accent-soft); padding: 4px 10px; border-radius: var(--es-r-sm);
+}
+.es-label-cap {
+  font-size: var(--es-fs-caption); letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--es-text-tertiary); font-weight: 500;
+}
+.es-card {
+  background: var(--es-bg-surface); border: 1px solid var(--es-border);
+  border-radius: var(--es-r-md); box-shadow: var(--es-sh-xs);
+}
