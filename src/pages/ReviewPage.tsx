@@ -43,7 +43,10 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
       setQueue(selectReviewMistakes(all, 8));
       setLoaded(true);
     })();
-    return () => { recorder.current?.stop().catch(() => {}); };
+    return () => {
+      recorder.current?.stop().catch(() => {});
+      audio.current?.close();
+    };
   }, [profile]);
 
   const cur = queue[idx];
@@ -59,6 +62,7 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
       const res = await window.echo.speakSentence(target);
       if (!res.ok) { setPlaying(false); setPlayErr(res.error || '播放失败,请检查网络与 API Key'); return; }
       const rate = Number(/rate=(\d+)/.exec(res.mimeType)?.[1]) || 24000;
+      audio.current?.close(); // release the previous AudioContext before replacing
       const q = new AudioQueue(rate);
       q.onPlaying = (active) => setPlaying(active);
       audio.current = q;

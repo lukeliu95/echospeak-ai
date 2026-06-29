@@ -166,4 +166,10 @@ export class AudioQueue {
   reset() {
     this.nextStart = 0;
   }
+
+  // Release the underlying AudioContext. Call from a page's useEffect cleanup
+  // so re-entering the page doesn't accrete idle contexts (browsers cap ~6 per page).
+  async close(): Promise<void> {
+    try { await this.ctx.close(); } catch { /* already closed / non-fatal */ }
+  }
 }

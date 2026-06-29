@@ -71,7 +71,10 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
   useEffect(() => {
     queue.current = new AudioQueue(24000);
     queue.current.onPlaying = (active) => setPlaying(active);
-    return () => { recorder.current?.stop().catch(() => {}); };
+    return () => {
+      recorder.current?.stop().catch(() => {});
+      queue.current?.close();
+    };
   }, []);
 
   // ---- play the original sentence via Gemini TTS (degrade gracefully) ----
@@ -83,6 +86,7 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
       const res = await window.echo.speakSentence(cur.en);
       if (!res.ok) { setPlaying(false); setPlayErr(res.error || '播放失败,请检查网络与 API Key'); return; }
       const rate = Number(/rate=(\d+)/.exec(res.mimeType)?.[1]) || 24000;
+      queue.current?.close(); // release the previous AudioContext before replacing
       const q = new AudioQueue(rate);
       q.onPlaying = (active) => setPlaying(active);
       queue.current = q;

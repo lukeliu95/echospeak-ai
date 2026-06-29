@@ -66,7 +66,11 @@ export function ConversationPage() {
       api.onError((m) => { setStatus('error'); setErrorMsg(m); }),
       api.onClosed(() => { setStarted(false); }),
     ];
-    return () => unsubs.forEach((u) => u());
+    return () => {
+      unsubs.forEach((u) => u());
+      mic.current?.stop().catch(() => {}); // user navigated away mid-talk — don't leak the mic
+      queue.current?.close();              // free the AudioContext too (browsers cap ~6/page)
+    };
   }, []);
 
   // tick user talk time while recording
