@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from '../router';
 import { selectReviewMistakes } from '../lib/reportData';
 import { MicRecorder, AudioQueue, base64ToInt16 } from '../lib/audio';
+import { clickable } from '../lib/a11y';
 import type { UserProfile, Mistake } from '../../electron/storage/types';
 import type { ScoreResult } from '../global';
 
@@ -159,7 +160,7 @@ export function ReviewPage({ profile }: { profile: UserProfile | null }) {
         <span className="pr-title">每日复习 · 高频错误优先</span>
         <div className="pr-bar"><i style={{ width: `${progressPct}%` }} /></div>
         <span className="pr-pct">第 {idx + 1} / {total} 句</span>
-        <span className="pr-exit" onClick={() => navigate('home')}>退出</span>
+        <span className="pr-exit" {...clickable(() => navigate('home'), '退出复习')}>退出</span>
       </div>
 
       <div className="rv-wrap rv-stage">

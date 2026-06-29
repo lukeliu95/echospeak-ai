@@ -8,6 +8,7 @@ import { useRouter } from '../router';
 import { generateDailyPlan } from '../lib/dailyPlan';
 import { todayStr } from '../lib/useProfile';
 import { getShadowSentences } from '../lib/sentenceBank';
+import { clickable } from '../lib/a11y';
 import { MicRecorder, AudioQueue, base64ToInt16 } from '../lib/audio';
 import type { UserProfile, Utterance, Mistake, PracticeSession } from '../../electron/storage/types';
 import type { ScoreResult } from '../global';
@@ -246,7 +247,7 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
           <span className="pr-title">今日训练 · {plan.theme}</span>
           <div className="pr-bar"><i style={{ width: '100%' }} /></div>
           <span className="pr-pct">{doneCount}/{total} 句</span>
-          <span className="pr-exit" onClick={() => navigate('home')}>返回首页</span>
+          <span className="pr-exit" {...clickable(() => navigate('home'), '返回首页')}>返回首页</span>
         </div>
         <div className="pr-grid">
           <div className="pr-col pr-center" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', gridColumn: '1 / -1' }}>
@@ -274,7 +275,7 @@ export function PracticePage({ profile }: { profile: UserProfile | null }) {
         <span className="pr-title">今日训练 · {plan.theme}</span>
         <div className="pr-bar"><i style={{ width: `${progressPct}%` }} /></div>
         <span className="pr-pct">第 {idx + 1} / {total} 句</span>
-        <span className="pr-exit" onClick={() => finishSet()}>完成退出</span>
+        <span className="pr-exit" {...clickable(() => finishSet(), '完成训练并退出')}>完成退出</span>
       </div>
 
       <div className="pr-grid">

@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from '../router';
 import type { UserProfile } from '../../electron/storage/types';
+import { clickable } from '../lib/a11y';
 
 const TIMES: (15 | 30 | 45 | 60)[] = [15, 30, 45, 60];
 const INTERESTS = ['日常生活', '工作沟通', '商务社交', '旅行', '面试', '学术'];
@@ -106,7 +107,7 @@ export function OnboardingPage({ onDone }: { onDone: () => void }) {
       </div>
 
       <div className="ob-footer">
-        <span className="skip" onClick={() => !saving && finish(true)}>
+        <span className="skip" {...clickable(() => { if (!saving) finish(true); }, '暂时跳过,用默认计划开始')}>
           暂时跳过，先用默认计划开始
         </span>
         <button className="es-btn es-btn-primary ob-next" disabled={saving} onClick={() => finish(false)}>

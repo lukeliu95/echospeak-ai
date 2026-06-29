@@ -8,9 +8,17 @@ export function useProfile() {
 
   const reload = useCallback(async () => {
     if (!window.echo?.store) { setLoading(false); return; }
-    const p = await window.echo.store.getProfile();
-    setProfile(p);
-    setLoading(false);
+    try {
+      const p = await window.echo.store.getProfile();
+      setProfile(p);
+    } catch (e) {
+      // IPC / storage init failure — fall through to Onboarding rather than
+      // leaving the user staring at "加载中…" forever.
+      console.error('getProfile failed; falling back to no-profile:', e);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
@@ -23,7 +31,12 @@ export function useSessions(userId: string | undefined) {
 
   const reload = useCallback(async () => {
     if (!userId || !window.echo?.store) return;
-    setSessions(await window.echo.store.getSessions(userId));
+    try {
+      setSessions(await window.echo.store.getSessions(userId));
+    } catch (e) {
+      console.error('getSessions failed:', e);
+      // keep last-known sessions; do not crash the home page stats.
+    }
   }, [userId]);
 
   useEffect(() => { reload(); }, [reload]);
@@ -40,13 +53,19 @@ export function useReportData(userId: string | undefined) {
 
   const reload = useCallback(async () => {
     if (!userId || !window.echo?.store) { setLoading(false); return; }
-    const sess = await window.echo.store.getSessions(userId);
-    // fan-out: one getUtterances per session (LocalAdapter is in-memory; cheap)
-    const uttLists = await Promise.all(sess.map((s) => window.echo.store.getUtterances(s.id)));
-    setSessions(sess);
-    setUtterances(uttLists.flat());
-    setMistakes(await window.echo.store.getMistakes(userId));
-    setLoading(false);
+    try {
+      const sess = await window.echo.store.getSessions(userId);
+      // fan-out: one getUtterances per session (LocalAdapter is in-memory; cheap)
+      const uttLists = await Promise.all(sess.map((s) => window.echo.store.getUtterances(s.id)));
+      setSessions(sess);
+      setUtterances(uttLists.flat());
+      setMistakes(await window.echo.store.getMistakes(userId));
+    } catch (e) {
+      console.error('useReportData load failed; report renders empty state:', e);
+      // empty arrays = friendly empty state, not a crash.
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
 
   useEffect(() => { reload(); }, [reload]);
