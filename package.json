@@ -1,7 +1,11 @@
 {
   "name": "echospeak-ai",
   "version": "0.1.0",
-  "description": "EchoSpeak AI — real-time English speaking coach (Gemini Live voice conversation slice)",
+  "description": "EchoSpeak AI — daily English listening & speaking trainer for Chinese speakers, powered by Google Gemini",
+  "author": "lukeliu95 <simprr@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/lukeliu95/echospeak-ai",
+  "repository": { "type": "git", "url": "https://github.com/lukeliu95/echospeak-ai.git" },
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
