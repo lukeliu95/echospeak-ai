@@ -41,6 +41,10 @@ contextBridge.exposeInMainWorld('echo', {
   evaluateUtterance: (audioBase64: string, targetText: string, mimeType?: string) =>
     ipcRenderer.invoke('ai:evaluateUtterance', { audioBase64, targetText, mimeType }),
 
+  // --- end-of-conversation summary (single JSON request) ---
+  summarizeConversation: (payload: { messages: Array<{ role: 'ai' | 'user'; text: string }>; durationSec: number; userTalkSec: number }) =>
+    ipcRenderer.invoke('ai:summarizeConversation', payload),
+
   // --- target-sentence TTS (returns base64 PCM the renderer plays) ---
   speakSentence: (text: string, voiceName?: string) =>
     ipcRenderer.invoke('ai:speakSentence', { text, voiceName }),

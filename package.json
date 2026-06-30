@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:roundtrip": "node test-conversation-roundtrip.mjs",
     "test:scoring": "node test-scoring-roundtrip.mjs",
+    "test:summary": "node test-summary-roundtrip.mjs",
     "test:closure": "node test-practice-data-closure.mjs",
     "test:storage": "node test-storage-smoke.mjs",
     "test:boot": "node test-electron-boot.mjs",

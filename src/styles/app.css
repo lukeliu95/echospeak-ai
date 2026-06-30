@@ -141,3 +141,112 @@ html, body, #root { height: 100%; }
 .cv-rail .rail-data { font-family: var(--es-font-data); font-size: var(--es-fs-data-lg); color: var(--es-text-primary); line-height: 1; }
 .cv-rail .rail-data small { font-size: var(--es-fs-body); color: var(--es-text-tertiary); font-family: var(--es-font-sans); margin-left: 4px; }
 .cv-rail .rail-sub { font-size: var(--es-fs-label); color: var(--es-text-secondary); margin-top: 6px; }
+
+/* ── End-of-session summary card ────────────────────────────────────────────
+   Sits inside .cv-stream so the existing flex/overflow chain handles the
+   page-height budget automatically — the summary scrolls within .cv-stream
+   the same way long transcripts do; the overall .app-body height never grows.
+   Voice & color follow the existing bubble tokens (accent-soft for warm
+   "wins", subtle for "improvements") so the card feels of-a-piece. */
+.cv-summary {
+  align-self: stretch;
+  background: var(--es-bg-surface);
+  border: 1px solid var(--es-border);
+  border-radius: var(--es-r-lg);
+  padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+  box-shadow: var(--es-sh-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+.cv-sum-head { display: flex; flex-direction: column; gap: 6px; }
+.cv-sum-eyebrow {
+  font-size: var(--es-fs-caption);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--es-accent); font-weight: 600;
+}
+.cv-sum-title {
+  font-size: var(--es-fs-title);
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--es-text-primary);
+  margin: 0;
+}
+.cv-sum-stats { display: flex; gap: 28px; padding: 4px 0 2px; }
+.cv-sum-num {
+  font-family: var(--es-font-data);
+  font-size: var(--es-fs-data-lg);
+  line-height: 1;
+  color: var(--es-text-primary);
+}
+.cv-sum-num small {
+  font-family: var(--es-font-sans);
+  font-size: var(--es-fs-body);
+  color: var(--es-text-tertiary);
+  margin-left: 4px;
+}
+.cv-sum-cap {
+  font-size: var(--es-fs-caption);
+  color: var(--es-text-tertiary);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.cv-sum-block { display: flex; flex-direction: column; gap: 8px; }
+.cv-sum-h {
+  font-size: var(--es-fs-label);
+  font-weight: 600;
+  color: var(--es-text-secondary);
+  letter-spacing: 0.02em;
+}
+.cv-sum-block ul {
+  margin: 0; padding-left: 18px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.cv-sum-block li {
+  font-size: var(--es-fs-body);
+  line-height: 1.5;
+  color: var(--es-text-primary);
+}
+.cv-sum-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.cv-sum-tag {
+  font-size: var(--es-fs-label);
+  background: var(--es-accent-soft);
+  color: var(--es-accent-active, var(--es-accent));
+  padding: 5px 11px;
+  border-radius: var(--es-r-pill);
+  line-height: 1.3;
+}
+.cv-sum-next {
+  margin: 0;
+  font-size: var(--es-fs-body);
+  line-height: 1.5;
+  color: var(--es-text-primary);
+}
+.cv-sum-actions { display: flex; gap: 10px; padding-top: 4px; }
+.cv-sum-btn {
+  font-family: inherit;
+  font-size: var(--es-fs-label);
+  padding: 9px 16px;
+  border: 1px solid var(--es-border);
+  border-radius: var(--es-r-sm);
+  background: var(--es-bg-surface);
+  color: var(--es-text-primary);
+  cursor: pointer;
+  transition: background var(--es-dur-fast, 120ms) var(--es-ease, ease);
+}
+.cv-sum-btn:hover { background: var(--es-bg-subtle); }
+.cv-sum-primary {
+  background: var(--es-accent);
+  color: var(--es-text-on-accent, #fff);
+  border-color: var(--es-accent);
+}
+.cv-sum-primary:hover { background: var(--es-accent-hover); }
+.cv-sum-err {
+  align-self: stretch;
+  padding: 14px 18px;
+  border: 1px solid var(--es-border);
+  border-radius: var(--es-r-md);
+  background: var(--es-bg-subtle);
+  font-size: var(--es-fs-body);
+  color: var(--es-text-secondary);
+  display: flex; align-items: center; gap: 12px;
+}
+.cv-end:disabled { opacity: 0.55; cursor: not-allowed; }

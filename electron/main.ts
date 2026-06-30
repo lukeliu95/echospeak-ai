@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { startLiveSession, type LiveSessionHandle } from './liveSession';
 import { evaluateUtterance } from './scoring';
+import { summarizeConversation, type SummaryMessage } from './conversationSummary';
 import { synthesizeSentenceCached } from './tts';
 import { createStorage } from './storage/factory';
 import type { StorageAdapter } from './storage/types';
@@ -211,6 +212,25 @@ ipcMain.handle('ai:evaluateUtterance', async (_e, payload: { audioBase64: string
       targetText: payload.targetText,
       mimeType: payload.mimeType,
     });
+    return { ok: true, result };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || String(err) };
+  }
+});
+
+// --- IPC: conversation summary (single multimodal-style JSON request, not Live).
+// Renderer sends the full transcript + talk-time stats when the user taps End;
+// gets back the structured coach summary that the End-of-session card renders.
+ipcMain.handle('ai:summarizeConversation', async (_e, payload: { messages: SummaryMessage[]; durationSec: number; userTalkSec: number }) => {
+  const key = getEffectiveKey();
+  if (!key) return { ok: false, error: 'GEMINI_API_KEY not found (env, api-keys.env, or settings override)' };
+  try {
+    const result = await summarizeConversation(
+      key,
+      Array.isArray(payload?.messages) ? payload.messages : [],
+      Number(payload?.durationSec) || 0,
+      Number(payload?.userTalkSec) || 0,
+    );
     return { ok: true, result };
   } catch (err: any) {
     return { ok: false, error: err?.message || String(err) };

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { MicCapture, AudioQueue, base64ToInt16 } from './lib/audio';
 import { TypewriterBubble, ConversationAvatar } from './conversationParts';
+import { useProfile, todayStr } from './lib/useProfile';
+import { useRouter } from './router';
+import type { ConversationSummary } from './global';
+import type { PracticeSession } from '../electron/storage/types';
 
 type Role = 'ai' | 'user';
 interface Msg { role: Role; text: string; }
@@ -21,11 +25,17 @@ export function ConversationPage() {
   const [started, setStarted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [userSeconds, setUserSeconds] = useState(0);
+  const [summary, setSummary] = useState<ConversationSummary | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState('');
 
+  const { profile } = useProfile();
+  const { navigate } = useRouter();
   const mic = useRef<MicCapture | null>(null);
   const queue = useRef<AudioQueue | null>(null);
   const streamRef = useRef<HTMLDivElement | null>(null);
   const recordStart = useRef<number>(0);
+  const sessionStart = useRef<number>(Date.now());
 
   // Append text to the last bubble of `role`, or open a new bubble.
   function appendText(role: Role, chunk: string) {
@@ -114,11 +124,80 @@ export function ConversationPage() {
   }
 
   async function endSession() {
+    // Disable the End button + show the analyzing state immediately so the user
+    // never sees the page sit silent after they tap End (Wave-3 false-promise fix).
+    if (summarizing) return;
+    setSummarizing(true);
+    setSummaryError('');
     setRecording(false);
-    await mic.current?.stop();
+    setStatus('analyzing');
+
+    // Snapshot stats BEFORE we tear down the mic, so the summary reflects what
+    // actually happened in this session.
+    const durationSec = Math.max(0, Math.round((Date.now() - sessionStart.current) / 1000));
+    const userTalkSec = userSeconds;
+    const snapshot = messages.map((m) => ({ role: m.role, text: m.text }));
+
+    // Ask Gemini for the structured coach summary. If it fails we STILL tear
+    // down audio/mic — leaking the mic because the summary call errored is
+    // unacceptable (round-005 lesson).
+    let result: ConversationSummary | null = null;
+    try {
+      const res = await window.echo.summarizeConversation({
+        messages: snapshot,
+        durationSec,
+        userTalkSec,
+      });
+      if (res.ok) result = res.result;
+      else setSummaryError(res.error || 'Summary failed');
+    } catch (e: any) {
+      setSummaryError(e?.message || String(e));
+    }
+
+    // Always tear down — mic / live audio / queue — even if the summary errored.
+    try { await mic.current?.stop(); } catch { /* ignore */ }
     mic.current = null;
-    await window.echo.stopConversation();
+    try { await window.echo.stopConversation(); } catch { /* ignore */ }
     setStarted(false);
+
+    if (result) {
+      setSummary(result);
+      // Write a practice_session so Home's "本周开口分钟" / streak reflects this
+      // free-talk session. Don't block the UI on the storage call.
+      if (profile && window.echo?.store) {
+        const speakingMin = Math.max(1, Math.round(userTalkSec / 60));
+        const actualMin = Math.max(speakingMin, Math.round(durationSec / 60));
+        const session: PracticeSession = {
+          id: `sess-conv-${Date.now()}`,
+          user_id: profile.id,
+          date: todayStr(),
+          planned_minutes: speakingMin,
+          actual_minutes: actualMin,
+          speaking_minutes: speakingMin,
+          listening_minutes: Math.max(0, actualMin - speakingMin),
+          completed: true,
+          topic: 'Free practice',
+          mode: 'free_talk',
+          summary: result.overall_feedback.slice(0, 200),
+          created_at: new Date().toISOString(),
+        };
+        try { await window.echo.store.saveSession(session); }
+        catch (e) { console.error('saveSession (free_talk) failed:', e); }
+      }
+    }
+
+    setStatus('idle');
+    setSummarizing(false);
+  }
+
+  // "Try another round" — wipe the summary + transcript so the learner can
+  // start a fresh free-talk session without leaving the page.
+  function restartConversation() {
+    setSummary(null);
+    setSummaryError('');
+    setMessages([]);
+    setUserSeconds(0);
+    sessionStart.current = Date.now();
     setStatus('idle');
   }
 
@@ -140,7 +219,7 @@ export function ConversationPage() {
       <div className="cv-layout">
         <div className="cv-body">
           <div className="cv-stream" ref={streamRef}>
-            {messages.length === 0 ? (
+            {messages.length === 0 && !summary ? (
               <div className="cv-empty">
                 Tap the microphone and say something in English.<br />
                 The AI coach will reply by voice and keep the conversation going.
@@ -152,6 +231,72 @@ export function ConversationPage() {
                   <TypewriterBubble text={m.text} role={m.role} />
                 </div>
               ))
+            )}
+
+            {summary && (
+              <section className="cv-summary" aria-live="polite">
+                <header className="cv-sum-head">
+                  <span className="cv-sum-eyebrow">Session summary · 本次回顾</span>
+                  <h3 className="cv-sum-title">{summary.overall_feedback}</h3>
+                </header>
+
+                <div className="cv-sum-stats">
+                  <div>
+                    <div className="cv-sum-num">{summary.speaking_minutes.toFixed(1)}<small>min</small></div>
+                    <div className="cv-sum-cap">You spoke · 开口时长</div>
+                  </div>
+                  <div>
+                    <div className="cv-sum-num">{summary.turn_count}<small>turns</small></div>
+                    <div className="cv-sum-cap">Turns taken · 发言轮数</div>
+                  </div>
+                </div>
+
+                {summary.strengths.length > 0 && (
+                  <div className="cv-sum-block">
+                    <div className="cv-sum-h">What you did well · 做得好</div>
+                    <ul>
+                      {summary.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+
+                {summary.improvements.length > 0 && (
+                  <div className="cv-sum-block">
+                    <div className="cv-sum-h">One thing to try · 一个改进点</div>
+                    <ul>
+                      {summary.improvements.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+
+                {summary.useful_phrases.length > 0 && (
+                  <div className="cv-sum-block">
+                    <div className="cv-sum-h">Useful phrases · 值得记住</div>
+                    <div className="cv-sum-tags">
+                      {summary.useful_phrases.map((p, i) => <span key={i} className="cv-sum-tag">{p}</span>)}
+                    </div>
+                  </div>
+                )}
+
+                {summary.next_step && (
+                  <div className="cv-sum-block">
+                    <div className="cv-sum-h">Next time · 下次试试</div>
+                    <p className="cv-sum-next">{summary.next_step}</p>
+                  </div>
+                )}
+
+                <div className="cv-sum-actions">
+                  <button className="cv-sum-btn cv-sum-primary" onClick={restartConversation}>再来一段 · One more round</button>
+                  <button className="cv-sum-btn" onClick={() => navigate('home')}>返回首页 · Back to home</button>
+                </div>
+              </section>
+            )}
+
+            {summaryError && !summary && (
+              <div className="cv-sum-err">
+                Couldn't generate a summary: {summaryError}.
+                <button className="cv-sum-btn" onClick={() => navigate('home')}>Back to home</button>
+              </div>
             )}
           </div>
 
@@ -173,7 +318,13 @@ export function ConversationPage() {
             <span className="cv-mic-label">
               {recording ? 'Listening… tap again when you finish.' : started ? 'Tap to speak your turn.' : 'Tap to start the conversation.'}
             </span>
-            <button className="cv-end" onClick={endSession}>End & summarize →</button>
+            <button
+              className="cv-end"
+              onClick={endSession}
+              disabled={summarizing || (messages.length === 0 && !started)}
+            >
+              {summarizing ? 'Summarizing…  生成总结中' : summary ? 'Summary ready ↓' : 'End & summarize →'}
+            </button>
           </div>
         </div>
 

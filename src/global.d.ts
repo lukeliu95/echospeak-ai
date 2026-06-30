@@ -55,6 +55,25 @@ export type SpeakResult =
   | { ok: true; audioBase64: string; mimeType: string }
   | { ok: false; error: string };
 
+// End-of-conversation summary returned by electron/conversationSummary.ts.
+// Mirror of ConversationSummary in the main process so the renderer is type-safe.
+export interface ConversationSummary {
+  overall_feedback: string;
+  speaking_minutes: number;
+  turn_count: number;
+  strengths: string[];
+  improvements: string[];
+  useful_phrases: string[];
+  next_step: string;
+}
+export interface SummaryMessageDto {
+  role: 'ai' | 'user';
+  text: string;
+}
+export type SummarizeResult =
+  | { ok: true; result: ConversationSummary }
+  | { ok: false; error: string };
+
 export interface EchoApi {
   startConversation: () => Promise<{ ok: boolean; error?: string }>;
   stopConversation: () => Promise<{ ok: boolean }>;
@@ -69,6 +88,7 @@ export interface EchoApi {
   store: StoreApi;
   aiStatus: () => Promise<AiStatus>;
   evaluateUtterance: (audioBase64: string, targetText: string, mimeType?: string) => Promise<EvaluateResult>;
+  summarizeConversation: (payload: { messages: SummaryMessageDto[]; durationSec: number; userTalkSec: number }) => Promise<SummarizeResult>;
   speakSentence: (text: string, voiceName?: string) => Promise<SpeakResult>;
 }
 
