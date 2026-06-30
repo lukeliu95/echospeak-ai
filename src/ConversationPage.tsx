@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { MicCapture, AudioQueue, base64ToInt16 } from './lib/audio';
+import { TypewriterBubble, ConversationAvatar } from './conversationParts';
 
 type Role = 'ai' | 'user';
 interface Msg { role: Role; text: string; }
@@ -124,7 +125,6 @@ export function ConversationPage() {
   // crude talk-ratio: user seconds vs total elapsed bubbles (placeholder metric for the slice)
   const ratioPct = Math.min(100, Math.round((userSeconds / Math.max(1, userSeconds + 8)) * 100));
   const statusClass = `st-${status}`;
-  const breathing = status === 'ai' || status === 'user';
 
   return (
     <>
@@ -149,14 +149,14 @@ export function ConversationPage() {
               messages.map((m, i) => (
                 <div key={i} className={`cv-msg ${m.role === 'ai' ? 'cv-ai' : 'cv-user'}`}>
                   <div className="m-who">{m.role === 'ai' ? 'AI Coach' : 'You'}</div>
-                  <div className="m-bubble">{m.text}</div>
+                  <TypewriterBubble text={m.text} role={m.role} />
                 </div>
               ))
             )}
           </div>
 
           <div className={`cv-status ${statusClass}`}>
-            <span className={`cv-orb ${breathing ? 'breath' : ''}`} />
+            <ConversationAvatar status={status} />
             <span className="st-txt">{status === 'error' ? `${STATUS_TEXT.error}: ${errorMsg}` : STATUS_TEXT[status]}</span>
           </div>
 

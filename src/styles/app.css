@@ -24,19 +24,92 @@ html, body, #root { height: 100%; }
 .cv-empty { margin: auto; text-align: center; color: var(--es-text-tertiary); font-size: var(--es-fs-body); max-width: 360px; }
 
 .cv-status { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 18px; background: var(--es-bg-app); border-top: 1px solid var(--es-border); }
-.cv-orb { width: 18px; height: 18px; border-radius: 50%; background: var(--es-text-tertiary); }
-.cv-orb.breath { animation: orbpulse var(--es-dur-breath) var(--es-ease-breath) infinite; }
-@keyframes orbpulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.4; } }
 .cv-status .st-txt { font-size: var(--es-fs-body); font-weight: 500; }
-.st-ai .cv-orb { background: var(--es-ai-speaking); }
-.st-ai .st-txt { color: var(--es-ai-speaking); }
-.st-user .cv-orb { background: var(--es-user-speaking); }
-.st-user .st-txt { color: var(--es-user-speaking); }
-.st-analyzing .cv-orb { background: var(--es-analyzing); }
-.st-analyzing .st-txt { color: var(--es-analyzing); }
 .st-idle .st-txt { color: var(--es-text-tertiary); }
-.st-error .cv-orb { background: var(--es-error); }
+.st-ai .st-txt { color: var(--es-ai-speaking); }
+.st-user .st-txt { color: var(--es-user-speaking); }
+.st-analyzing .st-txt { color: var(--es-analyzing); }
 .st-error .st-txt { color: var(--es-error); }
+
+/* ---- Conversation avatar · 48px SVG (Mia §1-§5) -----------------------
+   选择器 .cv-orb 复用(§1),换的是内部 SVG 实现。所有动画走 keyframes,
+   状态切换由父级 .st-* class override。同一时刻化身侧动画 ≤ 1(§4 R7)。 */
+.cv-orb { width: 48px; height: 48px; display: block; flex-shrink: 0; }
+.cv-orb .av-body  { fill: var(--es-text-tertiary); transition: fill var(--es-dur-base) var(--es-ease); }
+.cv-orb .av-eye   { fill: var(--es-bg-app); transform-origin: center; transition: cy var(--es-dur-base) var(--es-ease), ry var(--es-dur-base) var(--es-ease); }
+.cv-orb .av-think-dot { fill: var(--es-analyzing); opacity: 0; transition: opacity var(--es-dur-fast) var(--es-ease); }
+
+/* idle · 慢眨,5s 周期,两眼同步(§3.1) */
+.st-idle .cv-orb .av-eye { animation: cv-blink 5s var(--es-ease) infinite; }
+@keyframes cv-blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  97%           { transform: scaleY(0.05); }
+}
+
+/* user-speaking · 静止专注,眼睛睁大下垂(§3.2)· 不眨 */
+.st-user .cv-orb .av-body { fill: var(--es-user-speaking); }
+.st-user .cv-orb .av-eye  { cy: 22.8; ry: 4.2; animation: none; }
+
+/* analyzing · 闭眼 + 3 思考点循环 1200ms(§3.3) */
+.st-analyzing .cv-orb .av-body { fill: var(--es-analyzing); }
+.st-analyzing .cv-orb .av-eye  { transform: scaleY(0.05); animation: none; }
+.st-analyzing .cv-orb .av-think-1 { animation: cv-think 1200ms var(--es-ease) infinite; animation-delay: 0ms; }
+.st-analyzing .cv-orb .av-think-2 { animation: cv-think 1200ms var(--es-ease) infinite; animation-delay: 400ms; }
+.st-analyzing .cv-orb .av-think-3 { animation: cv-think 1200ms var(--es-ease) infinite; animation-delay: 800ms; }
+@keyframes cv-think {
+  0%, 100% { opacity: 0; }
+  40%      { opacity: 1; }
+  70%      { opacity: 0; }
+}
+
+/* ai-speaking · 整体微点头 ±1.5px / 900ms(§3.4)· 不眨,避免双动 */
+.st-ai .cv-orb { animation: cv-nod 900ms ease-in-out infinite; }
+.st-ai .cv-orb .av-body { fill: var(--es-ai-speaking); }
+.st-ai .cv-orb .av-eye  { animation: none; }
+@keyframes cv-nod {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+
+/* feedback · 微笑 600ms 后回 idle(§3.5)· 默认 OFF,React 不下发 .st-feedback */
+.st-feedback .cv-orb .av-body { fill: var(--es-feedback-ready); transition: fill var(--es-dur-slow) var(--es-ease); }
+.st-feedback .cv-orb .av-eye  { cy: 20; ry: 2; animation: none; transition: cy var(--es-dur-slow) var(--es-ease), ry var(--es-dur-slow) var(--es-ease); }
+
+/* error · 颜色变红,无动画 */
+.st-error .cv-orb .av-body { fill: var(--es-error); }
+.st-error .cv-orb .av-eye  { animation: none; }
+
+/* a11y · reduced-motion fallback(Mia §5.2)
+   功能/信息/颜色不丢,只把循环动画归零。 */
+@media (prefers-reduced-motion: reduce) {
+  .cv-orb { animation: none !important; }
+  .cv-orb .av-eye,
+  .cv-orb .av-think-dot { animation: none !important; }
+  .st-analyzing .cv-orb .av-eye { transform: scaleY(0.05); }
+  .st-analyzing .cv-orb .av-think-dot { opacity: 1; }
+}
+
+/* ---- Typewriter bubble · 视觉打字机(大刘 §2.2 方案 B) ----------------
+   字符立刻在 DOM(零延迟),只给"新增 span" 做 ≤180ms fade-in。
+   长 chunk(>30 字符)走 .tw-chunk 整段淡入(§2.4)。 */
+.tw-char {
+  display: inline-block;
+  opacity: 0;
+  animation: tw-fade 180ms var(--es-ease) forwards;
+  white-space: pre;
+}
+.tw-chunk {
+  display: inline;
+  opacity: 0;
+  animation: tw-fade 220ms var(--es-ease) forwards;
+}
+@keyframes tw-fade {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tw-char, .tw-chunk { animation: none; opacity: 1; transform: none; }
+}
 
 .cv-controls { display: flex; align-items: center; gap: 14px; padding: 16px 24px; background: var(--es-bg-surface); border-top: 1px solid var(--es-border); }
 .cv-mic { width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; background: var(--es-user-speaking); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform var(--es-dur-fast) var(--es-ease), background var(--es-dur-fast); }
