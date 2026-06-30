@@ -39,36 +39,50 @@ html, body, #root { height: 100%; }
 .cv-orb .av-eye   { fill: var(--es-bg-app); transform-origin: center; transition: cy var(--es-dur-base) var(--es-ease), ry var(--es-dur-base) var(--es-ease); }
 .cv-orb .av-think-dot { fill: var(--es-analyzing); opacity: 0; transition: opacity var(--es-dur-fast) var(--es-ease); }
 
-/* idle · 慢眨,5s 周期,两眼同步(§3.1) */
-.st-idle .cv-orb .av-eye { animation: cv-blink 5s var(--es-ease) infinite; }
+/* idle · 活泼版(Alan 调) · 4s 周期 + 双眨(在 90% / 95% 各眨一次,像生物)
+   原 Mia 钉死 5s 单眨 = "在视野边缘可被忽略";用户反馈不够活,所以更频繁+双眨。 */
+.st-idle .cv-orb .av-eye { animation: cv-blink 4s var(--es-ease) infinite; }
 @keyframes cv-blink {
-  0%, 94%, 100% { transform: scaleY(1); }
-  97%           { transform: scaleY(0.05); }
+  0%, 88%, 92%, 96%, 100% { transform: scaleY(1); }
+  90%, 94%                { transform: scaleY(0.05); }
+}
+/* idle 加一个偶发的"侧目"动作:整个 SVG 每 9s 微微左右扫一次(2px,500ms 来回),
+   不破几何、不破调性,但能传递"活的"感觉(人类 idle 时眼球不会完全静止)。 */
+.st-idle .cv-orb { animation: cv-glance 9s var(--es-ease) infinite; }
+@keyframes cv-glance {
+  0%, 78%, 100% { transform: translateX(0); }
+  85%           { transform: translateX(-2px); }
+  92%           { transform: translateX(2px); }
 }
 
-/* user-speaking · 静止专注,眼睛睁大下垂(§3.2)· 不眨 */
+/* user-speaking · 专注倾听(Alan 调)· 眼睛睁大下垂 + 整体微微前倾(似点头表达"在听") */
+.st-user .cv-orb { animation: cv-listen 1800ms ease-in-out infinite; }
 .st-user .cv-orb .av-body { fill: var(--es-user-speaking); }
 .st-user .cv-orb .av-eye  { cy: 22.8; ry: 4.2; animation: none; }
+@keyframes cv-listen {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(0.5px) scale(1.02); }
+}
 
-/* analyzing · 闭眼 + 3 思考点循环 1200ms(§3.3) */
+/* analyzing · 闭眼 + 思考点循环(Alan 调 1200→900ms,更急促像在想)*/
 .st-analyzing .cv-orb .av-body { fill: var(--es-analyzing); }
 .st-analyzing .cv-orb .av-eye  { transform: scaleY(0.05); animation: none; }
-.st-analyzing .cv-orb .av-think-1 { animation: cv-think 1200ms var(--es-ease) infinite; animation-delay: 0ms; }
-.st-analyzing .cv-orb .av-think-2 { animation: cv-think 1200ms var(--es-ease) infinite; animation-delay: 400ms; }
-.st-analyzing .cv-orb .av-think-3 { animation: cv-think 1200ms var(--es-ease) infinite; animation-delay: 800ms; }
+.st-analyzing .cv-orb .av-think-1 { animation: cv-think 900ms var(--es-ease) infinite; animation-delay: 0ms; }
+.st-analyzing .cv-orb .av-think-2 { animation: cv-think 900ms var(--es-ease) infinite; animation-delay: 300ms; }
+.st-analyzing .cv-orb .av-think-3 { animation: cv-think 900ms var(--es-ease) infinite; animation-delay: 600ms; }
 @keyframes cv-think {
   0%, 100% { opacity: 0; }
   40%      { opacity: 1; }
   70%      { opacity: 0; }
 }
 
-/* ai-speaking · 整体微点头 ±1.5px / 900ms(§3.4)· 不眨,避免双动 */
-.st-ai .cv-orb { animation: cv-nod 900ms ease-in-out infinite; }
+/* ai-speaking · 点头(Alan 调:1.5px→3px、900→700ms,明显在"说") · 不眨,避免双动 */
+.st-ai .cv-orb { animation: cv-nod 700ms ease-in-out infinite; }
 .st-ai .cv-orb .av-body { fill: var(--es-ai-speaking); }
 .st-ai .cv-orb .av-eye  { animation: none; }
 @keyframes cv-nod {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-1.5px); }
+  50%      { transform: translateY(-3px); }
 }
 
 /* feedback · 微笑 600ms 后回 idle(§3.5)· 默认 OFF,React 不下发 .st-feedback */
